@@ -81,6 +81,29 @@
             text-align: center;
             margin-top: 10px;
         }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background: #1e293b;
+        }
     </style>
 </head>
 <body>
@@ -89,22 +112,23 @@
     <h2>Brainrot Calculator</h2>
 
     <label>Brainrot Name</label>
-    <input type="text" id="brainrot" oninput="lockStat()">
+    <div style="position: relative;">
+        <input type="text" id="brainrot" oninput="showSuggestions()" autocomplete="off">
+        <div id="suggestions" class="suggestions"></div>
+    </div>
 
     <label>Base Stat ($ / Fish)</label>
     <input type="text" id="baseStat" readonly value="-">
 
-    <!-- ========================= -->
-    <!-- BRAINROT RANK (BARU) -->
-    <!-- ========================= -->
     <label>Brainrot Rank (0–4)</label>
-    <input type="number" id="rank" min="0" max="3" value="0">
+    <input type="number" id="rank" min="0" max="4" value="0">
 
     <label>Level</label>
     <input type="number" id="level" min="1" value="1">
 
     <label>Mutations</label>
     <div class="mutations">
+        <!-- ===== TEMPAT MENAMBAH MUTASI ===== -->
         <input type="checkbox" class="mutation" value="50"> Snowy (+50%)<br>
         <input type="checkbox" class="mutation" value="50"> Golden (+50%)<br>
         <input type="checkbox" class="mutation" value="60"> Sakura (+60%)<br>
@@ -126,6 +150,7 @@
 </div>
 
 <script>
+/* ===== TEMPAT MENAMBAH BRAINROT ===== */
 const brainrotDB = {
     "tung tung sahur": 100,
     "cappucino assasino": 150,
@@ -187,19 +212,55 @@ const brainrotDB = {
     "festive 67": 25000
 };
 
-function lockStat() {
-    const name = document.getElementById("brainrot").value.toLowerCase().trim();
-    const baseStatInput = document.getElementById("baseStat");
+function showSuggestions() {
+    const input = document.getElementById("brainrot");
+    const box = document.getElementById("suggestions");
+    const baseStat = document.getElementById("baseStat");
     const error = document.getElementById("error");
 
-    if (brainrotDB[name] !== undefined) {
-        baseStatInput.value = `$${brainrotDB[name]}`;
-        error.innerHTML = "";
-    } else {
-        baseStatInput.value = "-";
-        error.innerHTML = "Brainrot Not Found";
+    const query = input.value.toLowerCase().trim();
+    box.innerHTML = "";
+    box.style.display = "none";
+
+    if (query.length < 1) {
+        baseStat.value = "-";
+        return;
     }
+
+    const matches = Object.keys(brainrotDB)
+        .filter(name => name.startsWith(query));
+
+    if (matches.length === 0) {
+        error.innerHTML = "Brainrot Not Found";
+        baseStat.value = "-";
+        return;
+    }
+
+    error.innerHTML = "";
+    box.style.display = "block";
+
+    matches.forEach(name => {
+        const item = document.createElement("div");
+        item.className = "suggestion-item";
+        item.innerText = name;
+
+        item.onclick = () => {
+            input.value = name;
+            baseStat.value = `$${brainrotDB[name]}`;
+            box.style.display = "none";
+        };
+
+        box.appendChild(item);
+    });
 }
+
+document.addEventListener("click", e => {
+    const input = document.getElementById("brainrot");
+    const box = document.getElementById("suggestions");
+    if (!input.contains(e.target) && !box.contains(e.target)) {
+        box.style.display = "none";
+    }
+});
 
 function hitung() {
     const name = document.getElementById("brainrot").value.toLowerCase().trim();
@@ -207,32 +268,22 @@ function hitung() {
     const rank = parseInt(document.getElementById("rank").value);
     const result = document.getElementById("result");
 
-    if (
-        brainrotDB[name] === undefined ||
-        level < 1 ||
-        rank < 0 ||
-        rank > 4
-    ) {
+    if (!brainrotDB[name] || level < 1 || rank < 0 || rank > 4) {
         result.innerHTML = "Stat: -";
         return;
     }
 
     const baseStat = brainrotDB[name];
 
-    /* RANK → 10% PER RANK (MAX 3) */
     const rankMultiplier = 1 + (rank * 0.15);
-
-    /* LEVEL → 50% PER LEVEL */
     const levelMultiplier = 1 + ((level - 1) * 0.5);
 
-    /* MUTASI */
-    let totalMutationPercent = 0;
+    let mutationPercent = 0;
     document.querySelectorAll(".mutation:checked").forEach(m => {
-        totalMutationPercent += parseFloat(m.value);
+        mutationPercent += parseFloat(m.value);
     });
-    const mutationMultiplier = 1 + (totalMutationPercent / 100);
+    const mutationMultiplier = 1 + (mutationPercent / 100);
 
-    /* FORMULA FINAL */
     const finalStat =
         ((baseStat * rankMultiplier) * levelMultiplier) * mutationMultiplier;
 
