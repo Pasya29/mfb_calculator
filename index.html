@@ -97,7 +97,7 @@
     <!-- ========================= -->
     <!-- BRAINROT RANK (BARU) -->
     <!-- ========================= -->
-    <label>Brainrot Rank (0–3)</label>
+    <label>Brainrot Rank (0–4)</label>
     <input type="number" id="rank" min="0" max="3" value="0">
 
     <label>Level</label>
@@ -210,7 +210,7 @@ function hitung() {
         brainrotDB[name] === undefined ||
         level < 1 ||
         rank < 0 ||
-        rank > 3
+        rank > 4
     ) {
         result.innerHTML = "Stat: -";
         return;
