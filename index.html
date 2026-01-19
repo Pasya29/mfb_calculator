@@ -296,14 +296,14 @@ function hitung() {
         ((baseStat * rankMultiplier) * levelMultiplier) * mutationMultiplier;
 
     result.innerHTML = `
-        <b>Final Stat:</b><br>
-        $${formatNumber(finalStat)} / Fish
-        <small>
+    <b>Final Stat:</b><br>
+    $${formatNumber(finalStat)} / Fish<br><br>
+    <small>
         Rank: ${rankMultiplier}x<br>
         Level: ${levelMultiplier}x<br>
         Mutation: ${mutationMultiplier}x
-        </small>
-    `;
+    </small>
+`;
 }
 </script>
 
