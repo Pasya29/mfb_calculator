@@ -262,6 +262,14 @@ document.addEventListener("click", e => {
     }
 });
 
+function formatNumber(num) {
+    return num.toLocaleString("id-ID", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
+
 function hitung() {
     const name = document.getElementById("brainrot").value.toLowerCase().trim();
     const level = parseInt(document.getElementById("level").value);
@@ -289,7 +297,7 @@ function hitung() {
 
     result.innerHTML = `
         <b>Final Stat:</b><br>
-        $${finalStat.toFixed(2)} / Fish<br><br>
+        $${formatNumber(finalStat)} / Fish
         <small>
         Rank: ${rankMultiplier}x<br>
         Level: ${levelMultiplier}x<br>
